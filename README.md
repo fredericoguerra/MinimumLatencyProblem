@@ -5,7 +5,7 @@ This repository contains the implementation of a metaheuristic called GILS-RVND 
 From the project folder, open your terminal and execute the following commands:
 
 ```
-./tsp instances/<INSTANCE_NAME>
+./mlp instances/<INSTANCE_NAME>
 ```
 
 All the instances for testing are available in the [instances](https://github.com/fredericoguerra/TravelingSalesmanProblem/tree/main/instances) folder under this project.
