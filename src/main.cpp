@@ -55,6 +55,9 @@ struct Subsequence{
     * @param C Cumulative cost of a subsequence sigma.
     * @param W Delay cost of a subsequence sigma. (auxiliary)
     * @param T Timeframe of a subsequence sigma. (auxiliary)
+    * 
+    * ----------------------------------------------------------
+    * 
     * @return sigma Subsequence consisted of sigma1 and sigma2.
     */
     Subsequence sigma;
@@ -72,18 +75,29 @@ struct Subsequence{
 
 bool compares(insertion& insertion1, insertion& insertion2){
     /*
-    * This function compares the cost between two given solutions and returns True 
-    * if the second one is higher than the first. Otherwise, it returns False.
     * Compares the cost between two insertions.
     *
     *@param insertion1 First insertion structure.
     *@param insertion2 Second insertion structure.
+    *
+    *----------------------------------------------------------
+    *
     *@return True if the cost of insertion2 is higher than insertion1.
     */
     return insertion1.cost < insertion2.cost;
   }
 
 vector<insertion> calculate_insertion_cost(int origin, vector<int>& CL_){
+  /*
+  * Generates a group of candidate nodes and their insertion cost if connected to the origin node in the route.
+  * 
+  * @param origin A given node in the route.
+  * @param CL_ List of candidates to be inserted in the route.
+  * 
+  * ----------------------------------------------------------
+  * @return insertion_cost Structure composed by the candidate nodes and their insertion cost from the origin node.  
+  * 
+  * */
   //generates a full list of edges between s' nodes and the nodes from candidates list
   
   vector<insertion> insertion_cost(CL_.size());
@@ -97,11 +111,20 @@ vector<insertion> calculate_insertion_cost(int origin, vector<int>& CL_){
 }
 
 solution construction(vector<int> CL_) {
-  
+  /*
+  * Creates an initial random route solution for the problem.
+  * 
+  * @param CL_ List of candidates to be inserted in the route.
+  * 
+  * ----------------------------------------------------------
+  * 
+  * @return s_ Initial solution composed by the route and its cumulated cost. 
+  * */
+
   int random_index, j, i, origin = 1;
   solution s_;
   
-  //Add the node 1 as the depot and end location in the route
+  //Add the node 1 as the depot in the route
   s_.route.push_back(1);
 
   vector<insertion> insertion_cost;
@@ -125,42 +148,22 @@ solution construction(vector<int> CL_) {
       selected_node = range;
     }
     
-    //cout << "\ninsertion cost: " << insertion_cost[selected_node].node;
-    
     origin = insertion_cost[selected_node].node;
-    
-    //cout << "\norigin: " << origin;
     
     j=0;
     while(1){
       if(origin == CL_[j]){
-        //cout << "\n\nJ: " << j;
-        //cout << "\norigin: " << origin << "\nCL[j]: " << CL[j];
-        
+      
         CL_.erase(CL_.begin()+j);
         break;
+      
       }
       j++;
     }
     s_.route.push_back(origin);
-    /*
-    cout << "\nRoute: \n";
-    for(auto k: s_.route){
-      cout << k << " ";
-    }
-    cout << "\nCL: \n";
-    for(auto k: CL_){
-      cout << k << " ";
-    }
-    */
-  }
+    
+  }   
   s_.route.push_back(1);
-    /*
-    cout << "\nRoute: \n";
-    for(auto k: s_.route){
-      cout << k << " ";
-    }
-    */
   return s_;
 }
 
