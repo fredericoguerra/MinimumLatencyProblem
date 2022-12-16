@@ -167,8 +167,19 @@ solution construction(vector<int> CL_) {
   return s_;
 }
 
-void update_edge(solution s, vector<vector<Subsequence>> &subseq_matrix){
+void update_all_subsequences(solution s, vector<vector<Subsequence>> &subseq_matrix){
+  /*
+  * Updates all subquences values of a given solution s.
+  *
+  * ----------------------------------------------------------
+  * 
+  * @param s Current solution before a new movement is aplied if subseq_matrix[i][j].C is less than the current cumulated cost of s. 
+  * @param subseq_matrix Stores all the information specified in the Subsequence structure between two nodes in the route. Example: subseq_matrix[i][j] stores all the 
+  * information between nodes i and j - subseq_matrix[i][j].C is the cumulated cost from i to j. 
+  * 
+  */
   
+
   int n = s.route.size();
 
   for (int i = 0; i < n; i++){
@@ -196,14 +207,25 @@ void update_edge(solution s, vector<vector<Subsequence>> &subseq_matrix){
 
 }
 
-bool best_improvement_swap(solution& s_, vector<vector<Subsequence>> &subseq_matrix){
+bool apply_swap_movement(solution& s_, vector<vector<Subsequence>> &subseq_matrix){
+  /*
+  * Evaluates and applies a swap between two nodes i and j if that change reduces the entire route cumulated cost compared to the current solution.  
+  *
+  * @param s_ Current solution before applying the swap movement.
+  * @param subseq_matrix Stores all the information specified in the Subsequence structure between two nodes in the route s_.
+  * 
+  * ----------------------------------------------------------
+  * 
+  * @return bool True if swap movement reduced the entire route cumulated cost. Otherwise, False.
+  * 
+  */
 
+  //Cumulated cost of current solution
   double best_cost = subseq_matrix[0][dimension].C;
   int best_i, best_j;
 
+  //Auxialiry structures to store subsequences' informations before and after i and j nodes when evaluating the swap movement.
   Subsequence s1, s2, s3, s4, s5;
-
-  //cout << best_cost << "\n";
   
 
   for(int i =1; i< s_.route.size() - 1; i++){
@@ -230,16 +252,28 @@ bool best_improvement_swap(solution& s_, vector<vector<Subsequence>> &subseq_mat
   }
   
   if(best_cost < subseq_matrix[0][dimension].C){
+    //Apply swap movement and updates all subsequences if the swap movement should be adopted.
+
     swap(s_.route[best_i], s_.route[best_j]);
-    update_edge(s_, subseq_matrix);
+    update_all_subsequences(s_, subseq_matrix);
     return true;
   }
   return false;
 }
 
-bool best_improvement_2opt(solution& s_, vector<vector<Subsequence>> &subseq_matrix){
-  //double partial_cost, delta, best_delta = 0;
-  //int a, b, c, d, a_, b_, c_, d_, best_i, best_j;
+bool apply_2opt_movement(solution& s_, vector<vector<Subsequence>> &subseq_matrix){
+  /*
+  * Evaluates and applies a 2-opt movement between two nodes i and j if that change reduces the entire route cumulated cost compared to the current solution.  
+  *
+  * @param s_ Current solution before applying the 2opt movement.
+  * @param subseq_matrix Stores all the information specified in the Subsequence structure between two nodes in the route s_.
+  * 
+  * ----------------------------------------------------------
+  * 
+  * @return bool True if 2opt movement reduced the entire route cumulated cost. Otherwise, False.
+  * 
+  */
+
   int best_i, best_j, i, j;
   double best_cost = subseq_matrix[0][dimension].C;
 
@@ -269,19 +303,30 @@ if(best_cost < subseq_matrix[0][dimension].C){
     swap(s_.route[i], s_.route[j]);
     j--;
   }
-  update_edge(s_, subseq_matrix);
+  update_all_subsequences(s_, subseq_matrix);
   return true;
   }
   return false;
 }
 
-bool best_improvement_or_opt(solution& s_, vector<vector<Subsequence>> &subseq_matrix, int c){
-  int i, j, best_i, best_j;
+bool apply_reinsertion_movement(solution& s_, vector<vector<Subsequence>> &subseq_matrix, int n){
+  /*
+  * Evaluates and applies a reinsertion of n nodes between two nodes i and i+1 if that change reduces the entire route cumulated cost compared to the current solution.  
+  *
+  * @param s_ Current solution before applying the swap movement.
+  * @param subseq_matrix Stores all the information specified in the Subsequence structure between two nodes in the route s_.
+  * @param n Factor to invoke any of the 3 reinsertion cases. It represents how many nodes (1, 2 or 3) after j should be inserted between i and i+1. 
+  * ----------------------------------------------------------
+  * 
+  * @return bool True if the reinsertion movement reduces the entire route cumulated cost. Otherwise, False.
+  */
+  
+  int i, j, best_i, best_j, index;
   double best_cost = subseq_matrix[0][dimension].C;
 
   Subsequence s1, s2, s3;
 
-  switch(c){
+  switch(n){
     case 1:
       for(i=1; i< s_.route.size()-1; i++){
         for(j=1; j< s_.route.size()-1; j++){
@@ -307,12 +352,6 @@ bool best_improvement_or_opt(solution& s_, vector<vector<Subsequence>> &subseq_m
       }
 
       if(best_cost < subseq_matrix[0][dimension].C){
-        //best_cost = subseq_matrix[0][dimension].C;
-        //cout << "Route: " << endl;
-        //for(auto k: s_.route){
-          //cout << k << " ";
-        //}
-        //cout << endl;
         if(best_i < best_j){
           s_.route.insert(s_.route.begin() + best_j + 1, s_.route[best_i]);
           s_.route.erase(s_.route.begin() + best_i);
@@ -321,14 +360,9 @@ bool best_improvement_or_opt(solution& s_, vector<vector<Subsequence>> &subseq_m
           s_.route.insert(s_.route.begin() + best_j, s_.route[best_i]);
           s_.route.erase(s_.route.begin()+ best_i + 1);
         }
-        //cout << best_cost << endl;
-        update_edge(s_, subseq_matrix);
-        //cout << "New route: " << endl;
-        //for(auto k: s_.route){
-        //  cout << k << " ";
-        //}
-        //cout << endl;
-        //cout << subseq_matrix[0][dimension].C << endl << endl;
+
+        update_all_subsequences(s_, subseq_matrix);
+        
         return true;
       }
       return false;
@@ -348,6 +382,7 @@ bool best_improvement_or_opt(solution& s_, vector<vector<Subsequence>> &subseq_m
           else{
             continue;
           }
+
           if(s3.C < best_cost){
             best_i = i;
             best_j = j;
@@ -357,32 +392,24 @@ bool best_improvement_or_opt(solution& s_, vector<vector<Subsequence>> &subseq_m
       }
       
       if(best_cost < subseq_matrix[0][dimension].C){
-        //best_cost = subseq_matrix[0][dimension].C;
-        //cout << "Route: " << endl;
-        //for(auto k: s_.route){
-        //  cout << k << " ";
-        //}
-        //cout << endl;
         if(best_i < best_j){
-          s_.route.insert(s_.route.begin() + best_j + 1, s_.route[best_i]);
-          s_.route.insert(s_.route.begin() + best_j + 2, s_.route[best_i + 1]);
-          s_.route.erase(s_.route.begin() + best_i + 1);
-          s_.route.erase(s_.route.begin() + best_i);
+          for(index = 0; index < 2; index++){
+            s_.route.insert(s_.route.begin() + best_j + index + 1, s_.route[best_i + index]);
+          }
+          for(index = 1; index >= 0; index--){
+            s_.route.erase(s_.route.begin() + best_i + index);
+          }
         }
         else{
           s_.route.insert(s_.route.begin() + best_j, s_.route[best_i]);
           s_.route.insert(s_.route.begin() + best_j + 1, s_.route[best_i + 2]);
-          s_.route.erase(s_.route.begin()+ best_i + 3);
-          s_.route.erase(s_.route.begin()+ best_i + 2);
+          for(index = 1; index >= 0; index--){
+            s_.route.erase(s_.route.begin() + best_i + 2);
+          }
         }
-        //cout << best_cost << endl;
-        update_edge(s_, subseq_matrix);
-        //cout << "New route: " << endl;
-        //for(auto k: s_.route){
-        //  cout << k << " ";
-        //}
-        //cout << endl;
-        //cout << subseq_matrix[0][dimension].C << endl << endl;
+        
+        update_all_subsequences(s_, subseq_matrix);
+        
         return true;
       }
       return false;
@@ -402,6 +429,7 @@ bool best_improvement_or_opt(solution& s_, vector<vector<Subsequence>> &subseq_m
           else{
             continue;
           }
+          
           if(s3.C < best_cost){
             best_i = i;
             best_j = j;
@@ -411,36 +439,27 @@ bool best_improvement_or_opt(solution& s_, vector<vector<Subsequence>> &subseq_m
       }
       
       if(best_cost < subseq_matrix[0][dimension].C){
-        //best_cost = subseq_matrix[0][dimension].C;
-        //cout << "Route: " << endl;
-        //for(auto k: s_.route){
-        //  cout << k << " ";
-        //}
-        //cout << endl;
         if(best_i < best_j){
-          s_.route.insert(s_.route.begin() + best_j + 1, s_.route[best_i]);
-          s_.route.insert(s_.route.begin() + best_j + 2, s_.route[best_i + 1]);
-          s_.route.insert(s_.route.begin() + best_j + 3, s_.route[best_i + 2]);
-          s_.route.erase(s_.route.begin() + best_i + 2);
-          s_.route.erase(s_.route.begin() + best_i + 1);
-          s_.route.erase(s_.route.begin() + best_i);
+          for(index = 0; index < 3; index++){
+            s_.route.insert(s_.route.begin() + best_j + index + 1, s_.route[best_i + index]);
+          }
+          for(index = 2; index >= 0; index--){
+            s_.route.erase(s_.route.begin() + best_i + index);
+          }
         }
         else{
           s_.route.insert(s_.route.begin() + best_j, s_.route[best_i]);
-          s_.route.insert(s_.route.begin() + best_j + 1, s_.route[best_i + 2]);
-          s_.route.insert(s_.route.begin() + best_j + 2, s_.route[best_i + 4]);
-          s_.route.erase(s_.route.begin()+ best_i + 3);
-          s_.route.erase(s_.route.begin()+ best_i + 3);
-          s_.route.erase(s_.route.begin()+ best_i + 3);
+
+          for(index = 1; index <= 2; index++){
+            s_.route.insert(s_.route.begin() + best_j + index, s_.route[best_i + pow(2,index)]);
+          }
+          for(index = 0; index < 3; index++){
+            s_.route.erase(s_.route.begin() + best_i + 3);
+          }
         }
-        //cout << best_cost << endl;
-        update_edge(s_, subseq_matrix);
-        //cout << "New route: " << endl;
-        //for(auto k: s_.route){
-        //  cout << k << " ";
-        //}
-        //cout << endl;
-        //cout << subseq_matrix[0][dimension].C << endl << endl;
+        
+        update_all_subsequences(s_, subseq_matrix);
+        
         return true;
       }
       return false;
@@ -460,23 +479,23 @@ void local_search(solution& s_, vector<vector<Subsequence>> &subseq_matrix){
     switch (NL[n]){
       case 0:
         //improved = false;
-        improved = best_improvement_swap(s_, subseq_matrix);
+        improved = apply_swap_movement(s_, subseq_matrix);
         break;
       case 1:
         //improved = false;
-        improved = best_improvement_2opt(s_, subseq_matrix);
+        improved = apply_2opt_movement(s_, subseq_matrix);
         break;
       case 2:
-        improved = best_improvement_or_opt(s_, subseq_matrix, 1); // Reinsertion
+        improved = apply_reinsertion_movement(s_, subseq_matrix, 1); // Reinsertion
         //improved = false;
         break;
       case 3:
         //improved = false;
-        improved = best_improvement_or_opt(s_, subseq_matrix, 2); // Or-opt2
+        improved = apply_reinsertion_movement(s_, subseq_matrix, 2); // Or-opt2
         break;
       case 4:
         //improved = false;
-        improved = best_improvement_or_opt(s_, subseq_matrix, 3); // Or-opt3
+        improved = apply_reinsertion_movement(s_, subseq_matrix, 3); // Or-opt3
         break;
     }
     
@@ -559,7 +578,7 @@ solution pertubation(solution s_, vector<vector<Subsequence>> &subseq_matrix){
     }
   }
 
-  update_edge(s_, subseq_matrix);
+  update_all_subsequences(s_, subseq_matrix);
   return s_;
 }
 
@@ -599,7 +618,7 @@ int main(int argc, char** argv) {
 
     s_ = construction(CL_);
 
-    update_edge(s_, subseq_matrix);
+    update_all_subsequences(s_, subseq_matrix);
   
     best_cum_cost = subseq_matrix[0][dimension].C;
     best_s = s_;
@@ -611,7 +630,7 @@ int main(int argc, char** argv) {
       if(subseq_matrix[0][dimension].C < best_cum_cost){
         best_all_s = s_;
         best_cum_cost = subseq_matrix[0][dimension].C;
-        //update_edge(s_,subseq_matrix);
+        //update_all_subsequences(s_,subseq_matrix);
         //cout << best_cum_cost << endl;
         //cout << subseq_matrix[0][dimension].C << "\n";
         count = 0;
@@ -622,7 +641,7 @@ int main(int argc, char** argv) {
       count++;
     }
     if(best_cum_cost < best_all_cum_cost){
-      //update_edge(s_,subseq_matrix);
+      //update_all_subsequences(s_,subseq_matrix);
       best_all_s = best_s;
       best_all_cum_cost = best_cum_cost;
     }
