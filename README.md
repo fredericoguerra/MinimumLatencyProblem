@@ -36,3 +36,14 @@ apt install pipenv
 pipenv run jupyter lab
 
 ```
+
+## Results
+
+#### Distribution of the elapsed time by instance (20 reps)
+
+![plot](https://github.com/fredericoguerra/MinimumLatencyProblem/blob/main/results/time_distribution.png)
+
+
+#### Median value of the elapsed time by instance (20 reps)
+
+![plot](https://github.com/fredericoguerra/MinimumLatencyProblem/blob/main/results/time_median.png)
