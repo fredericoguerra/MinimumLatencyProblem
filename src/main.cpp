@@ -14,6 +14,7 @@ using namespace std;
 int dimension; //Number of locations
 double ** distance_matrix; //Matrix representing the distance between two cities.
 
+
 struct insertion{
   /*
   *This insertion structure helps representing the node insertion into a given solution s'.
@@ -179,7 +180,6 @@ void update_all_subsequences(solution s, vector<vector<Subsequence>> &subseq_mat
   * 
   */
   
-
   int n = s.route.size();
 
   for (int i = 0; i < n; i++){
@@ -478,24 +478,24 @@ void local_search(solution& s_, vector<vector<Subsequence>> &subseq_matrix){
     //cout << n <<"\n n";
     switch (NL[n]){
       case 0:
-        //improved = false;
         improved = apply_swap_movement(s_, subseq_matrix);
+        
         break;
       case 1:
-        //improved = false;
         improved = apply_2opt_movement(s_, subseq_matrix);
+
         break;
       case 2:
         improved = apply_reinsertion_movement(s_, subseq_matrix, 1); // Reinsertion
-        //improved = false;
+
         break;
       case 3:
-        //improved = false;
         improved = apply_reinsertion_movement(s_, subseq_matrix, 2); // Or-opt2
+
         break;
       case 4:
-        //improved = false;
         improved = apply_reinsertion_movement(s_, subseq_matrix, 3); // Or-opt3
+
         break;
     }
     
@@ -583,10 +583,9 @@ solution pertubation(solution s_, vector<vector<Subsequence>> &subseq_matrix){
 }
 
 int main(int argc, char** argv) {
+  const clock_t begin_time = clock();
 
   srand(time(NULL));
-
-  auto start = chrono::steady_clock::now();
 
   vector<int> CL_;
   int i, max_i, max_iter_ils, count;
@@ -641,17 +640,25 @@ int main(int argc, char** argv) {
       count++;
     }
     if(best_cum_cost < best_all_cum_cost){
+      //cout << best_cum_cost << endl;
       //update_all_subsequences(s_,subseq_matrix);
       best_all_s = best_s;
       best_all_cum_cost = best_cum_cost;
     }
   //cout << subseq_matrix[0][1].C << endl;
   }
-  cout << "Best Cost: " << best_all_cum_cost << endl;
-  cout << "Best Route: " << endl;
-  for(auto k: best_all_s.route){
-    cout << k << " ";
-  }
-  cout << endl;
+  double total_time = float( clock () - begin_time ) /  CLOCKS_PER_SEC;
+
+  std::ofstream output;
+  output.open("./experiment.csv", std::ios_base::app); //append instead of overwrite
+  output << "\n" << argv[1] << "," << total_time << "," << best_all_cum_cost;
+  //std::cout << "Elapsed Time: " << float( clock () - begin_time ) /  CLOCKS_PER_SEC << endl;
+  //cout << fixed;
+  //cout << "Best Cost: " << best_all_cum_cost << endl;
+  //cout << "Best Route: " << endl;
+  //for(auto k: best_all_s.route){
+  //  cout << k << " ";
+  //}
+  //cout << endl;
   return 0;
 }
